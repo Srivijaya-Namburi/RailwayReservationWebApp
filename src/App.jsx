@@ -1,104 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const App = () => {
-  const [formData, setFormData] = useState({
-    source: '',
-    destination: '',
-    date: '',
-    action: 'book'
-  });
+const trainsData = [
+  {
+    id: 101,
+    name: "Express 101",
+    from: "Noida",
+    to: "Bengaluru",
+    departure: "10:00 AM",
+    arrival: "2:00 PM",
+    status: "Available",
+  },
+  {
+    id: 102,
+    name: "Express 102",
+    from: "Kolkata",
+    to: "Delhi",
+    departure: "11:00 AM",
+    arrival: "3:00 PM",
+    status: "Waiting List",
+  },
+  {
+    id: 103,
+    name: "Express 103",
+    from: "Mumbai",
+    to: "Agra",
+    departure: "9:00 AM",
+    arrival: "1:00 PM",
+    status: "Available",
+  },
+];
 
-  const [submitted, setSubmitted] = useState(false);
+export default function RailwayReservationApp() {
+  const [source, setSource] = useState("");
+  const [destination, setDestination] = useState("");
+  const [date, setDate] = useState("");
+  const [results, setResults] = useState([]);
+  const [selectedTrain, setSelectedTrain] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleSearch = () => {
+    const filtered = trainsData.filter(
+      (train) =>
+        train.from.toLowerCase() === source.toLowerCase() &&
+        train.to.toLowerCase() === destination.toLowerCase()
+    );
+    setResults(filtered);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
+  const handleBooking = (train) => {
+    setSelectedTrain(train);
+    setShowPayment(true);
+  };
+
+  const handlePayment = () => {
+    if (selectedTrain.status === "Available") {
+      setBookingStatus(`✅ Booking Successful: ${selectedTrain.name} from ${selectedTrain.from} to ${selectedTrain.to}`);
+    } else {
+      setBookingStatus(`❌ Booking Failed: ${selectedTrain.name} - Status: ${selectedTrain.status}`);
+    }
+    setShowPayment(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4 text-center">Railway Reservation System</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium">Source Station</label>
-            <input
-              type="text"
-              name="source"
-              value={formData.source}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md p-2"
-              placeholder="Enter source"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Destination Station</label>
-            <input
-              type="text"
-              name="destination"
-              value={formData.destination}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md p-2"
-              placeholder="Enter destination"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Date of Journey</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md p-2"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Action</label>
-            <select
-              name="action"
-              value={formData.action}
-              onChange={handleChange}
-              className="mt-1 w-full border rounded-md p-2"
-            >
-              <option value="book">Book Ticket</option>
-              <option value="cancel">Cancel Ticket</option>
-              <option value="pay">Make Payment</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition"
-          >
-            Submit
-          </button>
-        </form>
-
-        {submitted && (
-          <div className="mt-6 bg-green-100 p-4 rounded-xl">
-            <p className="text-green-700 font-semibold">Your request has been submitted!</p>
-            <ul className="mt-2 text-sm text-gray-700 list-disc pl-5">
-              <li><strong>Source:</strong> {formData.source}</li>
-              <li><strong>Destination:</strong> {formData.destination}</li>
-              <li><strong>Date:</strong> {formData.date}</li>
-              <li><strong>Action:</strong> {formData.action}</li>
-            </ul>
-          </div>
-        )}
+    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+      <h1>Railway Reservation</h1>
+      <div style={{ marginBottom: '20px' }}>
+        <input placeholder="Source" value={source} onChange={(e) => setSource(e.target.value)} style={{ marginRight: '10px' }} />
+        <input placeholder="Destination" value={destination} onChange={(e) => setDestination(e.target.value)} style={{ marginRight: '10px' }} />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ marginRight: '10px' }} />
+        <button onClick={handleSearch}>Search</button>
       </div>
+
+      {bookingStatus && <p style={{ color: 'green', fontWeight: 'bold' }}>{bookingStatus}</p>}
+
+      <div>
+        {results.map(train => (
+          <div key={train.id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+            <h2>{train.name}</h2>
+            <p>{train.from} to {train.to}</p>
+            <p>Departure: {train.departure}, Arrival: {train.arrival}</p>
+            <p>Status: {train.status}</p>
+            <button onClick={() => handleBooking(train)}>Book Now</button>
+          </div>
+        ))}
+      </div>
+
+      {showPayment && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center'
+        }}>
+          <div style={{ background: 'white', padding: '20px', borderRadius: '5px', width: '300px' }}>
+            <h2>Payment Gateway</h2>
+            <p>Train: {selectedTrain.name}</p>
+            <p>From: {selectedTrain.from} → To: {selectedTrain.to}</p>
+            <input placeholder="Card Number" style={{ display: 'block', margin: '10px 0', width: '100%' }} />
+            <input placeholder="Expiry Date" style={{ display: 'block', margin: '10px 0', width: '100%' }} />
+            <input placeholder="CVV" style={{ display: 'block', margin: '10px 0', width: '100%' }} />
+            <button onClick={handlePayment} style={{ width: '100%' }}>Pay & Confirm</button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default App;
+}
